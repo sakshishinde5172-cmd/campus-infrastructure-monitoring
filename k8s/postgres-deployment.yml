@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: campus-postgres
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: campus-postgres
+  template:
+    metadata:
+      labels:
+        app: campus-postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:17
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_USER
+              value: campus_user
+            - name: POSTGRES_PASSWORD
+              value: campus_password
+            - name: POSTGRES_DB
+              value: campus_db

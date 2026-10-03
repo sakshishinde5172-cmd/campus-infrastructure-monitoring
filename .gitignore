@@ -1,0 +1,12 @@
+﻿.env
+backend/.env
+venv/
+.venv/
+*.db
+*.db.backup
+backend/uploads/
+uploads/
+*_backup*.py
+*_backup*.html
+__pycache__/
+*.pyc

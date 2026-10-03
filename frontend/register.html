@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Account — Campus Operations</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;700&family=IBM+Plex+Mono:wght@400;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0b0f19;
+      --card-bg: rgba(17, 24, 39, 0.75);
+      --border: rgba(255, 255, 255, 0.08);
+      --border-glow: rgba(20, 184, 166, 0.3);
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --teal: #14b8a6;
+      --teal-glow: rgba(20, 184, 166, 0.2);
+      --danger: #fca5a5;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      background-image: radial-gradient(circle at 50% 30%, rgba(20, 184, 166, 0.08) 0%, transparent 60%);
+    }
+    .auth-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      width: 100%;
+      max-width: 420px;
+      padding: 2.5rem 2rem;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    }
+    .brand-title {
+      font-family: 'Fraunces', serif;
+      font-size: 1.75rem;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(135deg, #fff 30%, var(--teal));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .subtitle {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin-bottom: 2rem;
+    }
+    .form-group { margin-bottom: 1.25rem; }
+    .form-group label {
+      display: block;
+      color: var(--text-muted);
+      font-size: 0.825rem;
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+    }
+    .input-wrapper { position: relative; display: flex; align-items: center; }
+    .input-field {
+      width: 100%;
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid var(--border);
+      color: #fff;
+      padding: 0.75rem 2.5rem 0.75rem 1rem;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      outline: none;
+      transition: all 0.2s;
+    }
+    .input-field:focus {
+      border-color: var(--teal);
+      box-shadow: 0 0 0 3px var(--teal-glow);
+    }
+    .input-field.invalid { border-color: var(--danger); }
+    .field-hint {
+      font-size: 0.75rem;
+      color: var(--danger);
+      margin-top: 0.35rem;
+      display: none;
+    }
+    .toggle-pw {
+      position: absolute;
+      right: 0.75rem;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 0.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.2s;
+    }
+    .toggle-pw:hover { color: #fff; }
+    .toggle-pw svg { width: 20px; height: 20px; }
+    .btn-submit {
+      width: 100%;
+      background: var(--teal);
+      color: #0b0f19;
+      font-weight: 600;
+      padding: 0.75rem;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-size: 0.95rem;
+      margin-top: 0.5rem;
+      transition: all 0.2s;
+    }
+    .btn-submit:hover {
+      filter: brightness(1.1);
+      box-shadow: 0 0 15px var(--teal-glow);
+    }
+    .auth-footer {
+      text-align: center;
+      margin-top: 1.5rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .auth-footer a { color: var(--teal); text-decoration: none; font-weight: 500; }
+    .auth-footer a:hover { text-decoration: underline; }
+    #error-msg {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #fca5a5;
+      padding: 0.6rem;
+      border-radius: 6px;
+      font-size: 0.825rem;
+      margin-bottom: 1rem;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="auth-card">
+    <h1 class="brand-title">Create Account</h1>
+    <p class="subtitle">Join Campus Infrastructure Operations</p>
+
+    <div id="error-msg"></div>
+
+    <form id="register-form" onsubmit="handleRegister(event)" novalidate>
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input type="text" id="username" class="input-field" placeholder="Enter username" required style="padding-right:1rem;" oninput="validateUsername()">
+        <div class="field-hint" id="username-hint">Username must contain only letters (3-30 characters), no numbers or symbols.</div>
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" class="input-field" placeholder="you@example.com" required style="padding-right:1rem;" oninput="validateEmail()">
+        <div class="field-hint" id="email-hint">Please enter a valid email address.</div>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <div class="input-wrapper">
+          <input type="password" id="password" class="input-field" placeholder="Enter password (min 8 characters)" required oninput="validatePassword()">
+          <button type="button" class="toggle-pw" onclick="togglePasswordVisibility('password','eye-icon')" aria-label="Toggle password visibility">
+            <svg id="eye-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+            </svg>
+          </button>
+        </div>
+        <div class="field-hint" id="password-hint">Password must be at least 8 characters long.</div>
+      </div>
+
+      <div class="form-group">
+        <label for="confirm-password">Confirm Password</label>
+        <div class="input-wrapper">
+          <input type="password" id="confirm-password" class="input-field" placeholder="Re-enter password" required oninput="validateConfirmPassword()">
+          <button type="button" class="toggle-pw" onclick="togglePasswordVisibility('confirm-password','eye-icon-2')" aria-label="Toggle password visibility">
+            <svg id="eye-icon-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+            </svg>
+          </button>
+        </div>
+        <div class="field-hint" id="confirm-password-hint">Passwords do not match.</div>
+      </div>
+
+      <button type="submit" class="btn-submit">Register</button>
+    </form>
+
+    <div class="auth-footer">
+      Already have an account? <a id="login-link" href="/login">Sign In</a>
+    </div>
+  </div>
+
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const nextParam = urlParams.get('next');
+    if (nextParam) {
+      document.getElementById('login-link').href = `/login?next=${encodeURIComponent(nextParam)}`;
+    }
+
+    const USERNAME_REGEX = /^[A-Za-z]{3,30}$/;
+    const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    function togglePasswordVisibility(inputId, iconId) {
+      const pwInput = document.getElementById(inputId);
+      const eyeIcon = document.getElementById(iconId);
+      if (pwInput.type === 'password') {
+        pwInput.type = 'text';
+        eyeIcon.innerHTML = `
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858-5.908a10.01 10.01 0 014.122-.963c4.478 0 8.268 2.943 9.542 7a10.025 10.025 0 01-4.132 5.411" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3l18 18" />
+        `;
+      } else {
+        pwInput.type = 'password';
+        eyeIcon.innerHTML = `
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+        `;
+      }
+    }
+
+    function validateUsername() {
+      const val = document.getElementById('username').value.trim();
+      const field = document.getElementById('username');
+      const hint = document.getElementById('username-hint');
+      const valid = USERNAME_REGEX.test(val);
+      field.classList.toggle('invalid', val.length > 0 && !valid);
+      hint.style.display = (val.length > 0 && !valid) ? 'block' : 'none';
+      return valid;
+    }
+
+    function validateEmail() {
+      const val = document.getElementById('email').value.trim();
+      const field = document.getElementById('email');
+      const hint = document.getElementById('email-hint');
+      const valid = EMAIL_REGEX.test(val);
+      field.classList.toggle('invalid', val.length > 0 && !valid);
+      hint.style.display = (val.length > 0 && !valid) ? 'block' : 'none';
+      return valid;
+    }
+
+    function validatePassword() {
+      const val = document.getElementById('password').value;
+      const field = document.getElementById('password');
+      const hint = document.getElementById('password-hint');
+      const valid = val.length >= 8;
+      field.classList.toggle('invalid', val.length > 0 && !valid);
+      hint.style.display = (val.length > 0 && !valid) ? 'block' : 'none';
+      validateConfirmPassword();
+      return valid;
+    }
+
+    function validateConfirmPassword() {
+      const pw = document.getElementById('password').value;
+      const cpw = document.getElementById('confirm-password').value;
+      const field = document.getElementById('confirm-password');
+      const hint = document.getElementById('confirm-password-hint');
+      const valid = cpw.length === 0 || cpw === pw;
+      field.classList.toggle('invalid', cpw.length > 0 && !valid);
+      hint.style.display = (cpw.length > 0 && !valid) ? 'block' : 'none';
+      return cpw.length > 0 && cpw === pw;
+    }
+
+    async function handleRegister(e) {
+      e.preventDefault();
+      const errBox = document.getElementById('error-msg');
+      errBox.style.display = 'none';
+
+      const usernameOk = validateUsername();
+      const emailOk = validateEmail();
+      const passwordOk = validatePassword();
+      const confirmOk = validateConfirmPassword();
+
+      if (!usernameOk) {
+        errBox.innerText = 'Username must contain at least one letter and only letters (3-30 characters).';
+        errBox.style.display = 'block';
+        return;
+      }
+      if (!emailOk) {
+        errBox.innerText = 'Please enter a valid email address.';
+        errBox.style.display = 'block';
+        return;
+      }
+      if (!passwordOk) {
+        errBox.innerText = 'Password must be at least 8 characters long.';
+        errBox.style.display = 'block';
+        return;
+      }
+      if (!confirmOk) {
+        errBox.innerText = 'Passwords do not match.';
+        errBox.style.display = 'block';
+        return;
+      }
+
+      const u = document.getElementById('username').value.trim();
+      const em = document.getElementById('email').value.trim();
+      const p = document.getElementById('password').value;
+      const cp = document.getElementById('confirm-password').value;
+
+      try {
+        const res = await fetch('/api/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: u, email: em, password: p, confirm_password: cp })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          const target = nextParam ? `/login?next=${encodeURIComponent(nextParam)}` : '/login';
+          window.location.href = target;
+        } else {
+          errBox.innerText = data.error || 'Registration failed';
+          errBox.style.display = 'block';
+        }
+      } catch (err) {
+        errBox.innerText = 'Server connection error';
+        errBox.style.display = 'block';
+      }
+    }
+  </script>
+</body>
+</html>

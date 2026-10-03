@@ -1,0 +1,285 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Overview - Campus Infrastructure Monitoring</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700;9..144,800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body data-page="overview">
+
+  <div class="topbar">
+    <a href="/dashboard" class="brand"><img src="/static/logo.png" alt="CIMS Logo"></a>
+    <nav class="topnav">
+      <a href="/dashboard" data-page="overview">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12l9-9 9 9M5 10v10h14V10"/></svg>
+        Overview
+      </a>
+      <a href="/dashboard/report" data-page="report">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+        Report
+      </a>
+      <a href="/dashboard/complaints" data-page="complaints">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 9h8M8 13h5"/></svg>
+        Complaints
+      </a>
+      <a href="/dashboard/analytics" data-page="analytics">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18M8 17V9m5 8V5m5 12v-6"/></svg>
+        Analytics
+      </a>
+      
+    </nav>
+    <div class="topbar-actions">
+      <div class="status-pill"><span class="status-dot"></span>System Operational</div>
+      <a href="/admin" class="admin-link hidden">Admin Panel</a>
+      <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+  </div>
+
+  <nav class="mobilenav">
+    <div class="mobilenav-inner">
+      <a href="/dashboard" data-page="overview">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12l9-9 9 9M5 10v10h14V10"/></svg>
+        Overview
+      </a>
+      <a href="/dashboard/report" data-page="report">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+        Report
+      </a>
+      <a href="/dashboard/complaints" data-page="complaints">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 9h8M8 13h5"/></svg>
+        Complaints
+      </a>
+      <a href="/dashboard/analytics" data-page="analytics">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18M8 17V9m5 8V5m5 12v-6"/></svg>
+        Analytics
+      </a>
+      
+    </div>
+  </nav>
+
+  <div class="page-header">
+    <p class="page-kicker">Dashboard</p>
+    <h1 class="page-title">Overview</h1>
+    <p class="page-sub">A quick read on campus condition, right now.</p>
+  </div>
+
+  <div class="container">
+
+    <div class="row-1">
+      <div class="panel-card gauge-wrap fade-in">
+        <h3 style="align-self:flex-start;">Health Index</h3>
+        <svg class="gauge-svg" viewBox="0 0 190 190">
+          <circle class="gauge-track" cx="95" cy="95" r="82"></circle>
+          <circle class="gauge-fill" id="gaugeFill" cx="95" cy="95" r="82"></circle>
+        </svg>
+        <div class="gauge-center">
+          <div class="gauge-percent" id="gaugePercent">0%</div>
+          <div class="gauge-label" id="gaugeLabel">Resolution Rate</div>
+        </div>
+        <div class="gauge-sub" id="gaugeSub"></div>
+      </div>
+
+      <div class="panel-card fade-in" style="animation-delay:0.05s;">
+        <h3>Top Locations</h3>
+        <div class="locations-list" id="locationsList"></div>
+      </div>
+
+      <div class="summary-stack fade-in" style="animation-delay:0.1s;">
+        <div class="summary-item">
+          <div class="summary-icon total">S</div>
+          <div class="summary-text"><div class="label">Total Complaints</div><div class="value" id="stat-total">0</div></div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-icon high">!</div>
+          <div class="summary-text"><div class="label">High Priority</div><div class="value" id="stat-high">0</div></div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-icon pending">?</div>
+          <div class="summary-text"><div class="label">Pending</div><div class="value" id="stat-pending">0</div></div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-icon resolved">?</div>
+          <div class="summary-text"><div class="label">Resolved</div><div class="value" id="stat-resolved">0</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row-2">
+      <div class="panel-card fade-in">
+        <div class="recent-header">
+          <h3 style="margin:0;">Recent Complaints</h3>
+          <a href="/dashboard/complaints" class="view-all-link">View All &rarr;</a>
+        </div>
+        <div class="recent-list" id="recentList"></div>
+      </div>
+
+      <div class="panel-card fade-in" style="animation-delay:0.05s;">
+        <h3>Quick Actions</h3>
+        <div class="quick-grid">
+          <a href="/dashboard/report" class="quick-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+            Report Issue
+          </a>
+          <button class="quick-btn" onclick="refreshAll()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4v6h6M20 20v-6h-6M4.5 15a8 8 0 0014.5 3.5M19.5 9A8 8 0 005 5.5"/></svg>
+            Refresh Data
+          </button>
+          <a href="/admin" class="quick-btn admin-quick-btn hidden">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z"/></svg>
+            Admin Panel
+          </a>
+          
+        </div>
+      </div>
+
+      <div class="panel-card fade-in" style="animation-delay:0.1s;">
+        <h3>By Priority</h3>
+        <canvas id="priorityChart"></canvas>
+        <div class="donut-legend" id="priorityLegend"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="/static/shared.js"></script>
+  <script>
+    let priorityChart;
+    const GAUGE_R = 82;
+    const GAUGE_CIRC = 2 * Math.PI * GAUGE_R;
+    document.getElementById("gaugeFill").style.strokeDasharray = `${GAUGE_CIRC} ${GAUGE_CIRC}`;
+    document.getElementById("gaugeFill").style.strokeDashoffset = GAUGE_CIRC;
+
+    function refreshAll() {
+      loadRecentAndLocations();
+      loadAnalytics();
+      showToast("Data refreshed.");
+    }
+
+    async function loadRecentAndLocations() {
+      try {
+        const response = await fetch(`${API}/api/complaints`);
+        const data = await response.json();
+        const complaints = (data.value || data).slice().reverse();
+        renderRecentComplaints(complaints.slice(0, 5));
+        renderLocations(complaints);
+      } catch (err) {
+        console.error("Failed to load complaints:", err);
+      }
+    }
+
+    function renderRecentComplaints(recent) {
+      const wrap = document.getElementById("recentList");
+      wrap.innerHTML = "";
+      if (!recent.length) {
+        wrap.innerHTML = `<div class="empty-state">No recent complaints.</div>`;
+        return;
+      }
+      recent.forEach(c => {
+        const priorityClass = (c.priority || "Medium").toLowerCase();
+        const icon = priorityClass === "high" ? "!" : priorityClass === "low" ? "-" : "?";
+        const row = document.createElement("div");
+        row.className = "recent-row";
+        row.innerHTML = `
+          <div class="recent-icon ${priorityClass}">${icon}</div>
+          <div class="recent-main">
+            <p class="recent-title">${escapeHtml(c.title)}</p>
+            <div class="recent-meta">${escapeHtml(c.location)}</div>
+          </div>
+          <span class="recent-time">${timeAgo(c.created_at)}</span>
+          <span class="badge ${priorityClass}">${escapeHtml(c.priority || "Medium")}</span>
+        `;
+        wrap.appendChild(row);
+      });
+    }
+
+    function renderLocations(complaints) {
+      const wrap = document.getElementById("locationsList");
+      const counts = {};
+      complaints.forEach(c => { const loc = c.location || "Unknown"; counts[loc] = (counts[loc] || 0) + 1; });
+      const entries = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 6);
+      wrap.innerHTML = "";
+      if (!entries.length) { wrap.innerHTML = `<div class="empty-state">No location data yet.</div>`; return; }
+      const max = entries[0][1];
+      entries.forEach(([loc, count]) => {
+        const row = document.createElement("div");
+        row.className = "location-row";
+        row.innerHTML = `
+          <span class="location-dot"></span>
+          <div class="location-info">
+            <div class="location-top"><span class="location-name">${escapeHtml(loc)}</span><span class="location-count">${count}</span></div>
+            <div class="location-bar-track"><div class="location-bar-fill" style="width:0%"></div></div>
+          </div>`;
+        wrap.appendChild(row);
+        requestAnimationFrame(() => { row.querySelector(".location-bar-fill").style.width = `${(count / max) * 100}%`; });
+      });
+    }
+
+    async function loadAnalytics() {
+      try {
+        const response = await fetch(`${API}/api/analytics`);
+        const data = await response.json();
+        const total = data.total || 0;
+        const high = data.by_priority["High"] || 0;
+        const pending = data.by_status["Pending"] || 0;
+        let resolved = 0;
+        Object.entries(data.by_status).forEach(([status, count]) => { if (isResolvedStatus(status)) resolved += count; });
+
+        countUp(document.getElementById("stat-total"), total);
+        countUp(document.getElementById("stat-high"), high);
+        countUp(document.getElementById("stat-pending"), pending);
+        countUp(document.getElementById("stat-resolved"), resolved);
+
+        renderGauge(total > 0 ? Math.round((resolved / total) * 100) : 0);
+        renderPriorityChart(data.by_priority);
+      } catch (err) {
+        console.error("Failed to load analytics:", err);
+      }
+    }
+
+    function renderGauge(pct) {
+      const offset = GAUGE_CIRC - (pct / 100) * GAUGE_CIRC;
+      const fill = document.getElementById("gaugeFill");
+      requestAnimationFrame(() => { fill.style.strokeDashoffset = offset; });
+      countUp(document.getElementById("gaugePercent"), pct, 1200);
+      setTimeout(() => { document.getElementById("gaugePercent").textContent = pct + "%"; }, 1250);
+      const label = document.getElementById("gaugeLabel");
+      const sub = document.getElementById("gaugeSub");
+      if (pct >= 80) { label.textContent = "Excellent"; sub.textContent = "Most reports resolved"; }
+      else if (pct >= 50) { label.textContent = "Good"; sub.textContent = "Steady resolution pace"; }
+      else if (pct > 0) { label.textContent = "Needs Attention"; sub.textContent = "Backlog building up"; }
+      else { label.textContent = "No Data Yet"; sub.textContent = "Awaiting first reports"; }
+    }
+
+    function renderPriorityChart(byPriority) {
+      const ctx = document.getElementById("priorityChart");
+      const labels = ["High", "Medium", "Low"];
+      const colors = ["#D97B78", "#E0A458", "#5FBF8F"];
+      const values = labels.map(l => byPriority[l] || 0);
+      if (priorityChart) priorityChart.destroy();
+      priorityChart = new Chart(ctx, {
+        type: "doughnut",
+        data: { labels, datasets: [{ data: values, backgroundColor: colors, borderWidth: 0 }] },
+        options: { plugins: { legend: { display: false } }, cutout: "70%" }
+      });
+      const legend = document.getElementById("priorityLegend");
+      legend.innerHTML = "";
+      labels.forEach((label, i) => {
+        const item = document.createElement("div");
+        item.className = "legend-item";
+        item.innerHTML = `<span class="legend-dot" style="background:${colors[i]}"></span> ${label} &middot; ${values[i]}`;
+        legend.appendChild(item);
+      });
+    }
+
+    loadRecentAndLocations();
+    loadAnalytics();
+  </script>
+</body>
+</html>

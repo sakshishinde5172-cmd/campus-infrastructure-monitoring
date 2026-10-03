@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Report an Issue - Campus Infrastructure Monitoring</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700;9..144,800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body data-page="report">
+
+  <div class="topbar">
+    <a href="/dashboard" class="brand"><img src="/static/logo.png" alt="CIMS Logo"></a>
+    <nav class="topnav">
+      <a href="/dashboard" data-page="overview">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12l9-9 9 9M5 10v10h14V10"/></svg>
+        Overview
+      </a>
+      <a href="/dashboard/report" data-page="report">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+        Report
+      </a>
+      <a href="/dashboard/complaints" data-page="complaints">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 9h8M8 13h5"/></svg>
+        Complaints
+      </a>
+      <a href="/dashboard/analytics" data-page="analytics">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18M8 17V9m5 8V5m5 12v-6"/></svg>
+        Analytics
+      </a>
+      
+    </nav>
+    <div class="topbar-actions">
+      <div class="status-pill"><span class="status-dot"></span>System Operational</div>
+      <a href="/admin" class="admin-link hidden">Admin Panel</a>
+      <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+  </div>
+
+  <nav class="mobilenav">
+    <div class="mobilenav-inner">
+      <a href="/dashboard" data-page="overview"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12l9-9 9 9M5 10v10h14V10"/></svg>Overview</a>
+      <a href="/dashboard/report" data-page="report"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>Report</a>
+      <a href="/dashboard/complaints" data-page="complaints"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 9h8M8 13h5"/></svg>Complaints</a>
+      <a href="/dashboard/analytics" data-page="analytics"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18M8 17V9m5 8V5m5 12v-6"/></svg>Analytics</a>
+      
+    </div>
+  </nav>
+
+  <div class="page-header">
+    <p class="page-kicker">New Report</p>
+    <h1 class="page-title">Report an Issue</h1>
+    <p class="page-sub">Flag something that needs attention &mdash; it'll route straight to facilities.</p>
+  </div>
+
+  <div class="container">
+    <div class="layout">
+      <div class="panel-card form-card fade-in">
+        <h2 style="font-family:'Fraunces',serif; font-size:17px; margin:0 0 4px;">Submit a report</h2>
+        <p class="sub">Be specific &mdash; a clear title and location gets it resolved faster.</p>
+
+        <label for="title">Title</label>
+        <input id="title" placeholder="e.g. Broken light in Room 101">
+
+        <label for="description">Description</label>
+        <textarea id="description" placeholder="What's happening, and how urgent is it?"></textarea>
+
+        <label for="location">Location</label>
+        <input id="location" placeholder="e.g. Block B, Room 101">
+
+        <label for="priority">Priority</label>
+        <select id="priority">
+          <option value="Low">Low</option>
+          <option value="Medium" selected>Medium</option>
+          <option value="High">High</option>
+        </select>
+                <input type="file" id="photoCamera" accept="image/png, image/jpeg, image/gif, image/webp" capture="environment" style="display:none" onchange="handlePhotoSelect(event)">
+        <input type="file" id="photoGallery" accept="image/png, image/jpeg, image/gif, image/webp" style="display:none" onchange="handlePhotoSelect(event)">
+        <div class="photo-drop" id="photoDrop" style="display:flex; flex-direction:column; gap:8px;">
+          <button type="button" class="submit-btn" style="margin:0;" onclick="document.getElementById('photoCamera').click()">Take Photo</button>
+          <button type="button" class="submit-btn" style="margin:0;" onclick="document.getElementById('photoGallery').click()">Choose from Gallery</button>
+        </div>
+        <label for="photo">Photo evidence (optional)</label>
+       
+        <div class="photo-preview-wrap" id="photoPreviewWrap">
+          <img id="photoPreview" alt="Selected photo preview">
+          <button type="button" class="photo-remove-btn" onclick="clearPhoto(event)">Remove</button>
+        </div>
+
+        <button class="submit-btn" onclick="submitComplaint()">Submit Complaint</button>
+      </div>
+
+      <div class="fade-in" style="animation-delay:0.05s;">
+        <div class="feed-header">
+          <h2>Your Recent Submissions</h2>
+          <a href="/dashboard/complaints" class="view-all-link">View All &rarr;</a>
+        </div>
+        <div class="tickets" id="recentSubmissions"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+  <div class="lightbox" id="lightbox" onclick="closeLightbox()"><img id="lightboxImg" alt="Complaint photo, full size"></div>
+
+  <script src="/static/shared.js"></script>
+  <script>
+    let selectedPhotoFile = null;
+
+    function handlePhotoSelect(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const maxBytes = 8 * 1024 * 1024;
+      if (file.size > maxBytes) {
+        showToast("Photo is too large (max 8MB).", true);
+        event.target.value = "";
+        return;
+      }
+      selectedPhotoFile = file;
+      const reader = new FileReader();
+      reader.onload = e => {
+        document.getElementById("photoPreview").src = e.target.result;
+        document.getElementById("photoPreviewWrap").classList.add("show");
+        
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function clearPhoto(event) {
+      event.stopPropagation();
+      selectedPhotoFile = null;
+            document.getElementById("photoCamera").value = "";
+      document.getElementById("photoGallery").value = "";
+      document.getElementById("photoPreviewWrap").classList.remove("show");
+      
+    }
+
+    async function submitComplaint() {
+      const title = document.getElementById("title").value.trim();
+      const description = document.getElementById("description").value.trim();
+      const location = document.getElementById("location").value.trim();
+      const priority = document.getElementById("priority").value;
+
+      if (!title || !description || !location) {
+        showToast("Please fill in title, description, and location.", true);
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("title", title);
+      formData.append("description", description);
+      formData.append("location", location);
+      formData.append("priority", priority);
+      if (selectedPhotoFile) formData.append("photo", selectedPhotoFile);
+
+      try {
+        const response = await fetch(`${API}/api/complaints`, { method: "POST", body: formData });
+        if (response.ok) {
+          showToast("Complaint submitted successfully.");
+          document.getElementById("title").value = "";
+          document.getElementById("description").value = "";
+          document.getElementById("location").value = "";
+          document.getElementById("priority").value = "Medium";
+          clearPhoto({ stopPropagation: () => {} });
+          loadRecentSubmissions();
+        } else {
+          const text = await response.text();
+          console.error("Server error:", response.status, text);
+          showToast("Failed to submit complaint (status " + response.status + ").", true);
+        }
+      } catch (err) {
+        console.error("Network/CORS error:", err);
+        showToast("Could not reach the server. Check console for details.", true);
+      }
+    }
+
+    async function loadRecentSubmissions() {
+      const list = document.getElementById("recentSubmissions");
+      try {
+        const response = await fetch(`${API}/api/complaints`);
+        const data = await response.json();
+        const complaints = (data.value || data).slice().reverse().slice(0, 6);
+        list.innerHTML = "";
+        if (!complaints.length) {
+          list.innerHTML = `<div class="empty-state">Nothing submitted yet &mdash; your reports will show up here.</div>`;
+          return;
+        }
+        complaints.forEach(complaint => {
+          const priorityClass = (complaint.priority || "Medium").toLowerCase();
+          const photoUrl = complaint.photo_url;
+          const ticket = document.createElement("div");
+          ticket.className = "ticket";
+          ticket.innerHTML = `
+            <div class="ticket-tab ${priorityClass}"></div>
+            ${photoUrl ? `<img class="ticket-thumb" src="${photoUrl}" alt="Complaint photo" onclick="openLightbox('${photoUrl}')">` : ""}
+            <div class="ticket-body">
+              <p class="ticket-title">${escapeHtml(complaint.title)}</p>
+              <p class="ticket-desc">${escapeHtml(complaint.description)}</p>
+              <div class="ticket-meta">${escapeHtml(complaint.location)}</div>
+            </div>
+            <div class="ticket-stub">
+              <span class="ticket-id">#${String(complaint.id).padStart(4, "0")}</span>
+              <span class="badge ${priorityClass}">${escapeHtml(complaint.priority || "Medium")}</span>
+              <span class="status-tag">${escapeHtml(complaint.status || "Pending")}</span>
+            </div>`;
+          list.appendChild(ticket);
+        });
+      } catch (err) {
+        console.error("Failed to load submissions:", err);
+        list.innerHTML = `<div class="empty-state">Couldn't load your submissions.</div>`;
+      }
+    }
+
+    (function handleIncomingLocation() {
+      const params = new URLSearchParams(window.location.search);
+      const qLocation = params.get("location");
+      if (qLocation) {
+        document.addEventListener("DOMContentLoaded", () => {
+          document.getElementById("location").value = qLocation;
+          document.getElementById("title").focus();
+        });
+      }
+    })();
+
+    loadRecentSubmissions();
+  </script>
+</body>
+</html>

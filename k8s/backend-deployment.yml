@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: campus-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: campus-backend
+  template:
+    metadata:
+      labels:
+        app: campus-backend
+    spec:
+      containers:
+        - name: campus-backend
+          image: campus-infrastructure-monitoring-backend:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5000
+          env:
+            - name: DATABASE_URL
+              value: "postgresql://campus_user:campus_password@campus-postgres-service:5432/campus_db"

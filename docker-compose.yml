@@ -1,0 +1,13 @@
+services:
+  backend:
+    build: .
+    container_name: campus-backend
+    ports:
+      - "5000:5000"
+    volumes:
+      - uploads_data:/app/uploads
+      - sqlite_data:/app/data
+
+volumes:
+  uploads_data:
+  sqlite_data:

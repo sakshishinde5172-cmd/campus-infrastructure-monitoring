@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Analytics - Campus Infrastructure Monitoring</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700;9..144,800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body data-page="analytics">
+
+  <div class="topbar">
+    <a href="/dashboard" class="brand"><img src="/static/logo.png" alt="CIMS Logo"></a>
+    <nav class="topnav">
+      <a href="/dashboard" data-page="overview">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12l9-9 9 9M5 10v10h14V10"/></svg>
+        Overview
+      </a>
+      <a href="/dashboard/report" data-page="report">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+        Report
+      </a>
+      <a href="/dashboard/complaints" data-page="complaints">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 9h8M8 13h5"/></svg>
+        Complaints
+      </a>
+      <a href="/dashboard/analytics" data-page="analytics">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18M8 17V9m5 8V5m5 12v-6"/></svg>
+        Analytics
+      </a>
+      
+    </nav>
+    <div class="topbar-actions">
+      <div class="status-pill"><span class="status-dot"></span>System Operational</div>
+      <a href="/admin" class="admin-link hidden">Admin Panel</a>
+      <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+  </div>
+
+  <nav class="mobilenav">
+    <div class="mobilenav-inner">
+      <a href="/dashboard" data-page="overview"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12l9-9 9 9M5 10v10h14V10"/></svg>Overview</a>
+      <a href="/dashboard/report" data-page="report"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>Report</a>
+      <a href="/dashboard/complaints" data-page="complaints"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 9h8M8 13h5"/></svg>Complaints</a>
+      <a href="/dashboard/analytics" data-page="analytics"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18M8 17V9m5 8V5m5 12v-6"/></svg>Analytics</a>
+      
+    </div>
+  </nav>
+
+  <div class="page-header">
+    <p class="page-kicker">Insights</p>
+    <h1 class="page-title">Analytics</h1>
+    <p class="page-sub">Where issues cluster, and how they're trending.</p>
+  </div>
+
+  <div class="container">
+    <div class="two-col">
+      <div class="panel-card fade-in">
+        <h3>By Priority</h3>
+        <canvas id="priorityChart"></canvas>
+        <div class="donut-legend" id="priorityLegend"></div>
+      </div>
+      <div class="panel-card fade-in" style="animation-delay:0.05s;">
+        <h3>Top Locations</h3>
+        <div class="locations-list" id="locationsList"></div>
+      </div>
+    </div>
+
+    <div class="panel-card fade-in" style="animation-delay:0.08s; margin-bottom:20px;">
+      <h3>Average Resolution Time</h3>
+      <div id="avgResValue" style="font-size:36px;font-weight:700;margin:8px 0;">--</div>
+      <div id="avgResNote" style="color:var(--muted);font-size:13px;"></div>
+    </div>
+    <div class="panel-card fade-in" style="animation-delay:0.1s;">
+      <h3>Status Breakdown</h3>
+      <div class="status-bar-track" id="statusBarTrack"></div>
+      <div class="status-legend" id="statusLegend"></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="/static/shared.js"></script>
+  <script>
+    let priorityChart;
+
+    async function loadAnalytics() {
+      try {
+        const response = await fetch(`${API}/api/analytics`);
+        const data = await response.json();
+        renderPriorityChart(data.by_priority);
+        renderStatusBreakdown(data.by_status, data.total || 0);
+        renderResolution(data);
+      } catch (err) {
+        console.error("Failed to load analytics:", err);
+      }
+    }
+
+    async function loadLocations() {
+      try {
+        const response = await fetch(`${API}/api/complaints`);
+        const data = await response.json();
+        renderLocations((data.value || data));
+      } catch (err) {
+        console.error("Failed to load complaints for locations:", err);
+      }
+    }
+
+    function renderPriorityChart(byPriority) {
+      const ctx = document.getElementById("priorityChart");
+      const labels = ["High", "Medium", "Low"];
+      const colors = ["#D97B78", "#E0A458", "#5FBF8F"];
+      const values = labels.map(l => byPriority[l] || 0);
+      if (priorityChart) priorityChart.destroy();
+      priorityChart = new Chart(ctx, {
+        type: "doughnut",
+        data: { labels, datasets: [{ data: values, backgroundColor: colors, borderWidth: 0 }] },
+        options: { plugins: { legend: { display: false } }, cutout: "70%" }
+      });
+      const legend = document.getElementById("priorityLegend");
+      legend.innerHTML = "";
+      labels.forEach((label, i) => {
+        const item = document.createElement("div");
+        item.className = "legend-item";
+        item.innerHTML = `<span class="legend-dot" style="background:${colors[i]}"></span> ${label} &middot; ${values[i]}`;
+        legend.appendChild(item);
+      });
+    }
+
+    function renderLocations(complaints) {
+      const wrap = document.getElementById("locationsList");
+      const counts = {};
+      complaints.forEach(c => { const loc = c.location || "Unknown"; counts[loc] = (counts[loc] || 0) + 1; });
+      const entries = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 8);
+      wrap.innerHTML = "";
+      if (!entries.length) { wrap.innerHTML = `<div class="empty-state">No location data yet.</div>`; return; }
+      const max = entries[0][1];
+      entries.forEach(([loc, count]) => {
+        const row = document.createElement("div");
+        row.className = "location-row";
+        row.innerHTML = `
+          <span class="location-dot"></span>
+          <div class="location-info">
+            <div class="location-top"><span class="location-name">${escapeHtml(loc)}</span><span class="location-count">${count}</span></div>
+            <div class="location-bar-track"><div class="location-bar-fill" style="width:0%"></div></div>
+          </div>`;
+        wrap.appendChild(row);
+        requestAnimationFrame(() => { row.querySelector(".location-bar-fill").style.width = `${(count / max) * 100}%`; });
+      });
+    }
+
+    function renderResolution(data) {
+      const val = document.getElementById("avgResValue");
+      const note = document.getElementById("avgResNote");
+      if (data.avg_resolution_days === null || data.avg_resolution_days === undefined) {
+        val.textContent = "--";
+        note.textContent = "No resolved complaints yet.";
+        return;
+      }
+      val.textContent = data.avg_resolution_days + (data.avg_resolution_days === 1 ? " day" : " days");
+      note.textContent = "Based on " + data.resolved_count + " resolved complaint" + (data.resolved_count === 1 ? "" : "s") + ".";
+    }
+
+    function renderStatusBreakdown(byStatus, total) {
+      const track = document.getElementById("statusBarTrack");
+      const legend = document.getElementById("statusLegend");
+      track.innerHTML = "";
+      legend.innerHTML = "";
+      const entries = Object.entries(byStatus);
+      if (!entries.length || !total) {
+        legend.innerHTML = `<span style="color:var(--muted); font-size:13px;">No status data yet.</span>`;
+        return;
+      }
+      entries.forEach(([status, count]) => {
+        const color = statusColor(status);
+        const pct = (count / total) * 100;
+        const seg = document.createElement("div");
+        seg.className = "status-bar-seg";
+        seg.style.background = color;
+        track.appendChild(seg);
+        requestAnimationFrame(() => { seg.style.width = pct + "%"; });
+        const chip = document.createElement("div");
+        chip.className = "status-chip";
+        chip.innerHTML = `<span class="dot" style="background:${color}"></span> ${escapeHtml(status)} <span class="count">${count}</span>`;
+        legend.appendChild(chip);
+      });
+    }
+
+    loadAnalytics();
+    loadLocations();
+  </script>
+</body>
+</html>

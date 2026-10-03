@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Complaints - Campus Infrastructure Monitoring</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700;9..144,800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body data-page="complaints">
+
+  <div class="topbar">
+    <a href="/dashboard" class="brand"><img src="/static/logo.png" alt="CIMS Logo"></a>
+    <nav class="topnav">
+      <a href="/dashboard" data-page="overview">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12l9-9 9 9M5 10v10h14V10"/></svg>
+        Overview
+      </a>
+      <a href="/dashboard/report" data-page="report">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+        Report
+      </a>
+      <a href="/dashboard/complaints" data-page="complaints">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 9h8M8 13h5"/></svg>
+        Complaints
+      </a>
+      <a href="/dashboard/analytics" data-page="analytics">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18M8 17V9m5 8V5m5 12v-6"/></svg>
+        Analytics
+      </a>
+      
+    </nav>
+    <div class="topbar-actions">
+      <div class="status-pill"><span class="status-dot"></span>System Operational</div>
+      <a href="/admin" class="admin-link hidden">Admin Panel</a>
+      <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+  </div>
+
+  <nav class="mobilenav">
+    <div class="mobilenav-inner">
+      <a href="/dashboard" data-page="overview"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12l9-9 9 9M5 10v10h14V10"/></svg>Overview</a>
+      <a href="/dashboard/report" data-page="report"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>Report</a>
+      <a href="/dashboard/complaints" data-page="complaints"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 9h8M8 13h5"/></svg>Complaints</a>
+      <a href="/dashboard/analytics" data-page="analytics"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18M8 17V9m5 8V5m5 12v-6"/></svg>Analytics</a>
+     
+    </div>
+  </nav>
+
+  <div class="page-header">
+    <p class="page-kicker">All Reports</p>
+    <h1 class="page-title">Complaints</h1>
+    <p class="page-sub">Every issue you've reported, in one place.</p>
+  </div>
+
+  <div class="container">
+    <div class="fade-in">
+      <div class="feed-header">
+        <h2 style="visibility:hidden; width:0; margin:0;">Complaints</h2>
+        <div class="feed-controls">
+          <input id="searchInput" placeholder="Search title or location..." oninput="applyFilters()">
+          <select id="statusFilter" onchange="applyFilters()">
+            <option value="">All Statuses</option>
+            <option value="Pending">Pending</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Resolved">Resolved</option>
+          </select>
+          <select id="priorityFilter" onchange="applyFilters()">
+            <option value="">All Priorities</option>
+            <option value="High">High</option>
+            <option value="Medium">Medium</option>
+            <option value="Low">Low</option>
+          </select>
+          <button class="refresh-btn" onclick="loadComplaints()">Refresh</button>
+        </div>
+      </div>
+      <div class="tickets" id="complaints"></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+  <div class="lightbox" id="lightbox" onclick="closeLightbox()"><img id="lightboxImg" alt="Complaint photo, full size"></div>
+
+  <script src="/static/shared.js"></script>
+  <script>
+    let allComplaints = [];
+
+    async function loadComplaints() {
+      const list = document.getElementById("complaints");
+      try {
+        const response = await fetch(`${API}/api/complaints`);
+        const data = await response.json();
+        allComplaints = (data.value || data).slice().reverse();
+        applyFilters();
+      } catch (err) {
+        console.error("Failed to load complaints:", err);
+        list.innerHTML = `<div class="empty-state">Couldn't load complaints. Check the console for details.</div>`;
+      }
+    }
+
+    function applyFilters() {
+      const q = document.getElementById("searchInput").value.toLowerCase();
+      const status = document.getElementById("statusFilter").value;
+      const priority = document.getElementById("priorityFilter").value;
+
+      const filtered = allComplaints.filter(c => {
+        const matchesQ = !q || (c.title || "").toLowerCase().includes(q) || (c.location || "").toLowerCase().includes(q);
+        const matchesStatus = !status || c.status === status;
+        const matchesPriority = !priority || c.priority === priority;
+        return matchesQ && matchesStatus && matchesPriority;
+      });
+
+      renderComplaints(filtered);
+    }
+
+    function renderComplaints(complaints) {
+      const list = document.getElementById("complaints");
+      list.innerHTML = "";
+
+      if (!complaints.length) {
+        list.innerHTML = `<div class="empty-state">No complaints match your filters.</div>`;
+        return;
+      }
+
+      complaints.forEach(complaint => {
+        const priorityClass = (complaint.priority || "Medium").toLowerCase();
+        const photoUrl = complaint.photo_url;
+        const ticket = document.createElement("div");
+        ticket.className = "ticket";
+        ticket.innerHTML = `
+          <div class="ticket-tab ${priorityClass}"></div>
+          ${photoUrl ? `<img class="ticket-thumb" src="${photoUrl}" alt="Complaint photo" onclick="openLightbox('${photoUrl}')">` : ""}
+          <div class="ticket-body">
+            <p class="ticket-title">${escapeHtml(complaint.title)}</p>
+            <p class="ticket-desc">${escapeHtml(complaint.description)}</p>
+            <div class="ticket-meta">${escapeHtml(complaint.location)} &middot; ${timeAgo(complaint.created_at)}</div>
+          </div>
+          <div class="ticket-stub">
+            <span class="ticket-id">#${String(complaint.id).padStart(4, "0")}</span>
+            <span class="badge ${priorityClass}">${escapeHtml(complaint.priority || "Medium")}</span>
+            <span class="status-tag">${escapeHtml(complaint.status || "Pending")}</span>
+          </div>`;
+        list.appendChild(ticket);
+      });
+    }
+
+    loadComplaints();
+  </script>
+</body>
+</html>

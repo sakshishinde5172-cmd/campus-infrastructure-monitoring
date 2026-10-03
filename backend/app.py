@@ -19,7 +19,7 @@ FRONTEND_DIR = os.path.join(PROJECT_ROOT, 'frontend')
 UPLOAD_FOLDER = os.path.join(PROJECT_ROOT, 'uploads')
  
 app = Flask(__name__, static_folder=FRONTEND_DIR, template_folder=FRONTEND_DIR)
-app.secret_key = 'campus_monitoring_secret_key'
+app.secret_key = os.getenv('SECRET_KEY', 'campus_monitoring_secret_key')
 CORS(app)
  
 @app.after_request
@@ -94,12 +94,13 @@ class Complaint(db.Model):
  
 with app.app_context():
     db.create_all()
-    if not User.query.filter_by(username='admin').first():
+    admin_pw = os.getenv('ADMIN_PASSWORD') or ('admin123' if os.getenv('FLASK_DEBUG') == '1' else None)
+    if admin_pw and not User.query.filter_by(username='admin').first():
         head_user = User(username='admin', is_admin=True)
-        head_user.set_password('admin123')
+        head_user.set_password(admin_pw)
         db.session.add(head_user)
         db.session.commit()
-        print(">>> Default Head Admin account created: admin / admin123")
+        print(">>> Head Admin account created")
  
 @app.route('/')
 def home():
@@ -246,7 +247,7 @@ Title: {title}
 Description: {description}
  
 Respond with ONLY one word: Low, Medium, or High."""
-        response = model.generate_content(prompt)
+        response = model.generate_content(prompt, request_options={'timeout': 10})
         result = response.text.strip()
         if result in ['Low', 'Medium', 'High']:
             return result
@@ -388,4 +389,4 @@ def complaint_detail(cid):
         return jsonify({'message': 'Deleted successfully'})
  
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=os.getenv('FLASK_DEBUG') == '1')

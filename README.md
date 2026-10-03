@@ -72,14 +72,7 @@ campus-infrastructure-monitoring/
 
 6. **Open the site** at http://localhost:5000. Other devices on the same Wi-Fi can use `http://YOUR-PC-IP:5000`.
 
-## Planned Features
-
-- Location dropdown for consistent location names
-- Complaint heatmap
-- Admin assignment to staff
-- Upvoting of duplicate complaints
-- Student rating after resolution
-
 ## Author
 
 Sakshi Shinde
+

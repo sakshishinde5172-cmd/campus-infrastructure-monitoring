@@ -72,6 +72,8 @@ campus-infrastructure-monitoring/
 
 6. **Open the site** at http://localhost:5000. Other devices on the same Wi-Fi can use `http://YOUR-PC-IP:5000`.
 
+7. ![CI](https://github.com/sakshishinde5172-cmd/campus-infrastructure-monitoring/actions/workflows/ci.yml/badge.svg)
+
 ## Author
 
 Sakshi Shinde

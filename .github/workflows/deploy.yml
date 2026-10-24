@@ -9,6 +9,12 @@ jobs:
     steps:
       - name: Reload PythonAnywhere site
         run: |
-          curl -sS -o /dev/null -w "HTTP %{http_code}\n" -X POST \
+          curl -sS -o /dev/null -w "RELOAD HTTP %{http_code}\n" -X POST \
             -H "Authorization: Token ${{ secrets.PA_API_TOKEN }}" \
             https://www.pythonanywhere.com/api/v0/user/campuscims/webapps/campuscims.pythonanywhere.com/reload/
+
+      - name: Test consoles API
+        run: |
+          curl -sS -o /dev/null -w "CONSOLES HTTP %{http_code}\n" \
+            -H "Authorization: Token ${{ secrets.PA_API_TOKEN }}" \
+            https://www.pythonanywhere.com/api/v0/user/campuscims/consoles/
